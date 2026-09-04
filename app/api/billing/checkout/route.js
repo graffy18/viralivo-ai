@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "../../../../lib/supabase/server";
 
 export async function POST(req) {
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({error:"STRIPE_SECRET_KEY fehlt"},{status:500});
