@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "../../../../lib/supabase/server";
 
 const demoScript = (topic) => ({
   title: `3 Dinge über ${topic}`,
@@ -38,10 +38,27 @@ export async function POST(request) {
   const { data: consumed } = await supabase.rpc("consume_credit", { p_user_id:user.id });
   if (consumed !== true) return NextResponse.json({error:"Dein Kontingent wurde bereits aufgebraucht."},{status:402});
 
-  const { error: insertError } = await supabase.from("projects").insert({
-    user_id:user.id, title:output.title, topic, script:output.script, status:"script_ready"
-  });
-  if (insertError) return NextResponse.json({error:"Projekt konnte nicht gespeichert werden."},{status:500});
+  const { data: project, error: insertError } = await supabase
+  .from("projects")
+  .insert({
+    user_id: user.id,
+    title: output.title,
+    topic,
+    script: output.script,
+    status: "script_ready"
+  })
+  .select("id")
+  .single();
 
-  return NextResponse.json({...output, projectId: project.id});
+if (insertError) {
+  return NextResponse.json(
+    { error: "Projekt konnte nicht gespeichert werden." },
+    { status: 500 }
+  );
 }
+
+return NextResponse.json({
+  ...output,
+  projectId: project.id
+});
+
