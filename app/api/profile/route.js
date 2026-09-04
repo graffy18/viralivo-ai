@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {createClient} from '../../../lib/supabase/server';
+export async function PATCH(req){const sb=await createClient();const {data:{user}}=await sb.auth.getUser();if(!user)return NextResponse.json({error:'Nicht eingeloggt'},{status:401});const body=await req.json();const display_name=String(body.display_name||'').trim().slice(0,80);const {error}=await sb.from('profiles').update({display_name}).eq('id',user.id);if(error)return NextResponse.json({error:error.message},{status:500});return NextResponse.json({ok:true});}

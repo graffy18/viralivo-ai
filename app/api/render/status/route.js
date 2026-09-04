@@ -1,0 +1,2 @@
+import {createClient} from '../../../../lib/supabase/server';
+export async function GET(req){const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)return Response.json({error:'Nicht eingeloggt'},{status:401});const id=new URL(req.url).searchParams.get('jobId');if(!id)return Response.json({error:'jobId fehlt'},{status:400});const {data,error}=await supabase.from('render_jobs').select('*').eq('id',id).eq('user_id',user.id).single();if(error)return Response.json({error:error.message},{status:404});return Response.json({job:data});}

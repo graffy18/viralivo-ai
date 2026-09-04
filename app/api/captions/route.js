@@ -1,0 +1,4 @@
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+export async function POST(req){const c=await cookies();const s=createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,{cookies:{getAll:()=>c.getAll(),setAll:()=>{}}});const {data:{user}}=await s.auth.getUser();if(!user)return NextResponse.json({error:"Nicht eingeloggt"},{status:401});const {scenes=[]}=await req.json();return NextResponse.json({scenes:scenes.map(x=>{const words=String(x.caption||"").trim().split(/\s+/).filter(Boolean),total=Math.max(1,Number(x.duration||4)),w=words.map(v=>Math.max(1,v.length)),sum=w.reduce((a,b)=>a+b,0)||1;let t=0;const wordTimings=words.map((word,i)=>{const d=total*w[i]/sum,o={word,start:+t.toFixed(3),end:+(t+d).toFixed(3)};t+=d;return o});return {...x,wordTimings};})});}
