@@ -1,0 +1,38 @@
+name: Unpack Viralivo AI
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unpack project
+        run: |
+          unzip -q ViralivoAI.zip -d extracted
+
+          if [ -d "extracted/ViralivoAI" ]; then
+            cp -a extracted/ViralivoAI/. .
+          else
+            cp -a extracted/. .
+          fi
+
+          rm -rf extracted
+          rm -f ViralivoAI.zip
+
+      - name: Commit project files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Add Viralivo AI project"
+          git push
